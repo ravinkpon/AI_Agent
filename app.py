@@ -1,6 +1,6 @@
 import streamlit as st
 from unify import Unify
-import llm_data
+import config
 
 
 def main():
@@ -11,7 +11,7 @@ def main():
         unify_key = st.text_input("Enter your UNIFY_KEY:", type="password")
         
         # Dropdown for choosing LLM
-        llms = (llm_data.llms)
+        llms = (config.llms)
 
         # Dropdown for choosing LLM
         llm_selected = st.selectbox("Choose an LLM:", list(llms.keys()))
@@ -26,8 +26,6 @@ def main():
         user_prompt = st.text_area("Enter your prompt:")
         submitted = st.form_submit_button("Submit")
 
-    
-    
     
     if submitted:
         if unify_key:
