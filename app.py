@@ -1,10 +1,10 @@
 import streamlit as st
 from unify import Unify
 import config
-from youtube_search import YouTubeSearch
+from youtube_search_ import YouTubeSearch
 from wolfram_alpha import WolframAlphaSearch
-from openweathermap import OpenWeatherMapSearch
-# from duckduckgo_search import DuckDuckGoSearch
+from openweathermap_ import OpenWeatherMapSearch
+from duckduckgo_search_ import DuckDuckGoSearch
 
 def main():
     st.title("Interface")
@@ -44,9 +44,9 @@ def main():
             st.write("Response:")
             st.write(response)
 
-        # if user_prompt:
-        #     st.write("DuckDuckGo Search Results:")
-        #     st.write(DuckDuckGoSearch().execute_search(user_prompt))
+        if user_prompt:
+            st.write("DuckDuckGo Search Results:")
+            st.write(DuckDuckGoSearch().execute_search(user_prompt))
             
         if wolfarm_app_id and user_prompt:
             wolfram_search = WolframAlphaSearch(wolfarm_app_id)
