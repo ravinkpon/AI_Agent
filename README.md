@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-Certainly! Below is the updated section for the README.md file, including instructions on how to obtain a Unify API key:
-
----
-
 # AI Agent
 
 The AI Agent is designed to leverage a language model to make decisions by choosing a sequence of actions.
@@ -47,9 +42,3 @@ This project is licensed under the [MIT License](LICENSE).
 ---
 
 This section guides users on how to obtain a Unify API key from the Unify Console and integrate it with the AI Agent application. Make sure to replace `"https://github.com/yourusername/AI_Agent.git"` with the actual URL of your GitHub repository.
-=======
-# AI_Agent
-The core idea of agents is to use a language model to choose a sequence of actions to take. 
-
-soon requirements.txt will be added
->>>>>>> 8cbb76333ae6a2970490bd47f44d34c4250fc8d4
