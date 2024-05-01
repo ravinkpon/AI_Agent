@@ -2,6 +2,10 @@
 
 The AI Agent is designed to leverage a language model to make decisions by choosing a sequence of actions.
 
+## Demo
+
+This app deployed in streamlit feel free to check :) [AI_Agent](https://ravinkponunifyaiagent.streamlit.app).
+
 ## Getting Started
 
 To get started with the AI Agent, follow these steps:
