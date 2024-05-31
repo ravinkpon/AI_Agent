@@ -113,10 +113,10 @@ class StreamlitApp:
             self.agent = YouTubeSearch()
             
         elif self.service_selected == "Wolfram Alpha":
-            self.agent = WolframAlpha(self.llm_selected,self.provider_selected,self.unify_key,"ETGVRJ-H6QTRWUAJ5")
+            self.agent = WolframAlpha(self.llm_selected,self.provider_selected,self.unify_key,st.secrets["wolfram_app_id"]) #secret key for wolfram alpha
             
         elif self.service_selected == "OpenWeatherMap":
-            self.agent = OpenWeatherMap(self.llm_selected,self.provider_selected,self.unify_key,"0c19de4beefa6628948a7ffe529b240e")
+            self.agent = OpenWeatherMap(self.llm_selected,self.provider_selected,self.unify_key,st.secrets["openweathermap_api_key"]) #secret key for openweathermap    
 
     
     def run(self):
