@@ -1,10 +1,12 @@
 import streamlit as st
 import utilities.config as config
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
+from langchain_community.callbacks import StreamlitCallbackHandler
 from tools.chat_with_ddgo import Duckduckgo
 from tools.chat_for_weather import OpenWeatherMap
 from tools.chat_with_wolfram import WolframAlpha
 from tools.youtube_search_ import YouTubeSearch, VideoSummarizer
+import requests
 
 class StreamlitApp:
     def __init__(self):
@@ -80,48 +82,89 @@ class StreamlitApp:
             # Consider adding st.experimental_rerun() here if needed for caching issues
                 summarize_and_display(url)
                 #st.experimental_rerun()
-                
-   
-     
+                         
     def display_input_text_area(self):
         avatars = {"human": "user", "ai": "assistant"}
-        for msg in self.msgs.messages:
+        print("msgs",self.msgs.messages)
+        for idx, msg in enumerate(self.msgs.messages):
+            print("msg",msg)
             with st.chat_message(avatars[msg.type]):
-
+                # render the intermediate steps
+                for step in st.session_state.steps.get(str(idx), []):
+                    if step[0].tool == "_Exception":
+                        continue
+                    with st.expander(f"**{step[0].tool}**: {step[0].tool_input}"):
+                        st.write(step[0].log)
+                        st.write(f"**{step[1]}**")
                 st.write(msg.content)
                 
         prompt = st.chat_input("Ask your question to the Agent")
-        
+                
         if prompt is not None:
             with st.chat_message(avatars["human"]):
                 st.write(prompt)
             
             with st.chat_message("assistant"):
-                response = self.agent.run(prompt)
+                st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+                # cfg = RunnableConfig()
+                # cfg["callbacks"] = [st_cb]
+                response = self.agent.run(prompt,callbacks=[st_cb])
                 if self.service_selected == "YouTube":
                     self.display_yt_thumbnail(response)
                 else: 
                     st.write(response["output"])
                     self.msgs.add_user_message(prompt)
                     self.msgs.add_ai_message(response["output"])
+                    st.session_state.steps[str(len(self.msgs.messages)-1)] = response["intermediate_steps"]
+    
                 
     def create_llm_engine(self):
         if self.service_selected == "DuckDuckGo":
-            self.agent = Duckduckgo(self.llm_selected,self.provider_selected,self.unify_key)
+            self.agent = Duckduckgo(self.llm_selected,self.provider_selected,self.unify_key,self.msgs)
         
         elif self.service_selected == "YouTube":
             self.agent = YouTubeSearch()
             
         elif self.service_selected == "Wolfram Alpha":
-            self.agent = WolframAlpha(self.llm_selected,self.provider_selected,self.unify_key,st.secrets["wolfram_app_id"]) #secret key for wolfram alpha
-            
+            self.agent = WolframAlpha(self.llm_selected,self.provider_selected,self.unify_key,st.secrets["wolfram_app_id"],self.msgs) #secret key for wolfram alpha
+
         elif self.service_selected == "OpenWeatherMap":
             self.agent = OpenWeatherMap(self.llm_selected,self.provider_selected,self.unify_key,st.secrets["openweathermap_api_key"]) #secret key for openweathermap    
+            
+    
+    def validate_api_key(self, api_key):
+        # Example URL and headers for the validation request
+        url = "https://api.unify.ai/v0/get_credits"
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            st.sidebar.success(f"Valid API key Balance_Credits: {int(data['credits'])}")
+            st.session_state.api_key_valid = True
+            # print(f"Credits: {data['credits']}")
+            # print(f"User ID: {data['id']}")           
+            return True
+        except requests.exceptions.RequestException as e:
+            st.sidebar.error(f"API key validation failed: {e}")
+            st.session_state.api_key_valid = False
+            return False
 
     
     def run(self):
         #st.sidebar.title("Sidebar")
-        self.unify_key = st.sidebar.text_input("Enter your UNIFY_KEY:", type="password",key="unify_key") # handle if key is not entered todo
+        self.unify_key = st.sidebar.text_input("Enter your UNIFY_KEY:", type="password",key="unify_key") 
+        valid_key_button = st.sidebar.button("Validate UNIFY_KEY")
+        if valid_key_button:
+            if self.validate_api_key(self.unify_key):
+                True
+            else:
+                False
+
+
         # Handle radio button change
         if 'radio_selection' not in st.session_state:
             st.session_state.radio_selection = self.radio_options[0]
@@ -156,6 +199,4 @@ class StreamlitApp:
 
 #todo
 
-# need to handle unify key not entered
-# need to handle if key is not entered
 # bit slow in response
