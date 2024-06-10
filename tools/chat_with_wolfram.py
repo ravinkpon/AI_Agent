@@ -1,17 +1,18 @@
 from langchain.memory import ConversationBufferMemory
 from langchain_unify.chat_models import ChatUnify
-from langchain.agents import ConversationalChatAgent, AgentExecutor,load_tools
+from langchain.agents import ConversationalChatAgent, AgentExecutor,load_tools,AgentType
 import os
 
 
 
 
 class WolframAlpha:
-    def __init__(self,llm_selected,provider_selected,unify_key,wolfram_app_id):
+    def __init__(self,llm_selected,provider_selected,unify_key,wolfram_app_id,messages):
         self.llm_selected = llm_selected
         self.provider_selected = provider_selected
         self.unify_key = unify_key
         self.wolfram = wolfram_app_id
+        self.messages = messages
         os.environ["WOLFRAM_ALPHA_APPID"] = wolfram_app_id
         self.creat_agent()
         
@@ -24,15 +25,17 @@ class WolframAlpha:
             )
         self.executor = AgentExecutor.from_agent_and_tools(
                         agent=self.chat_agent,
+                        AgentExecutor=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
                         tools=self.tools,
                         #verbose=True,
                         memory=self.memory,
                         handle_parsing_errors=True,
+                        return_intermediate_steps=True #testing retunring intermediate steps
                     )
             #return executor.invoke({"input":prompt})
     
-    def run(self,prompt):
-        response = self.executor.invoke({"input": prompt})
+    def run(self,prompt,**callbacks):
+        response = self.executor.invoke({"input": prompt},callbacks)
         #print (response["output"])
         return response
 
@@ -47,4 +50,4 @@ if __name__ == "__main__":
 
 # todo
 
-#performing good with wolfram alpha
+#need to test with wolfram alpha 
